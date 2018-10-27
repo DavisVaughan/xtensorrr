@@ -1,13 +1,13 @@
 Package: xtensorrr
-Title: What the Package Does (One Line, Title Case)
+Title: An Easier Leap Into 'xtensor'
 Version: 0.0.0.9000
 Authors@R: 
-    person(given = "First",
-           family = "Last",
+    person(given = "Davis",
+           family = "Vaughan",
            role = c("aut", "cre"),
-           email = "first.last@example.com")
-Description: What the package does (one paragraph).
-License: What license it uses
+           email = "davis@rstudio.com")
+Description: Bundle all of 'xtensor' into one package for easy use.
+License: GPL-3
 Encoding: UTF-8
 LazyData: true
 LinkingTo: 
@@ -15,3 +15,5 @@ LinkingTo:
 Imports: 
     Rcpp
 RoxygenNote: 6.1.0.9000
+URL: https://github.com/DavisVaughan/xtensorrr
+BugReports: https://github.com/DavisVaughan/xtensorrr/issues
