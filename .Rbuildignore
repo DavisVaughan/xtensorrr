@@ -1,3 +1,4 @@
+^README\.Rmd$
+^LICENSE\.md$
 ^xtensorrr\.Rproj$
 ^\.Rproj\.user$
-examples.R
