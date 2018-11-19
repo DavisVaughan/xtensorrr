@@ -702,7 +702,7 @@ namespace xt
     }
 
     /**
-     * Returns a reference to the underlying reference of the view.
+     * Returns a reference to the underlying expression of the view.
      */
     template <class CT, class S, layout_type L, class FST>
     inline auto xstrided_view_base<CT, S, L, FST>::expression() noexcept -> xexpression_type&
@@ -711,7 +711,7 @@ namespace xt
     }
 
     /**
-     * Returns a constant reference to the underlying reference of the view.
+     * Returns a constant reference to the underlying expression of the view.
      */
     template <class CT, class S, layout_type L, class FST>
     inline auto xstrided_view_base<CT, S, L, FST>::expression() const noexcept -> const xexpression_type&
@@ -959,7 +959,7 @@ namespace xt
                 base_type::resize(dimension);
 
                 auto old_shape = shape;
-                using old_strides_vt = std::decay_t<decltype(old_strides[0])>;
+                using old_strides_value_type = typename std::decay_t<ST>::value_type;
 
                 std::ptrdiff_t axis_skip = 0;
                 std::size_t idx = 0, i = 0, i_ax = 0;
@@ -972,7 +972,7 @@ namespace xt
                     auto ptr = xtl::get_if<std::ptrdiff_t>(&slices[i]);
                     if (ptr != nullptr)
                     {
-                        auto slice0 = static_cast<old_strides_vt>(*ptr);
+                        auto slice0 = static_cast<old_strides_value_type>(*ptr);
                         new_offset += static_cast<std::size_t>(slice0 * old_strides[i_ax]);
                     }
                     else if (xtl::get_if<xt::xnewaxis_tag>(&slices[i]) != nullptr)

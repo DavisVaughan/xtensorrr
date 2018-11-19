@@ -19,13 +19,11 @@
 
 #include "xlayout.hpp"
 #include "xshape.hpp"
+#include "xtensor_forward.hpp"
 #include "xutils.hpp"
 
 namespace xt
 {
-
-    template <class E>
-    class xshared_expression;
 
     /***************************
      * xexpression declaration *
@@ -136,12 +134,40 @@ namespace xt
     template <class... E>
     using has_xexpression = xtl::disjunction<is_xexpression<E>...>;
 
+    /***********************
+     * evaluation_strategy *
+     ***********************/
+
+    namespace evaluation_strategy
+    {
+        struct base
+        {
+        };
+
+        struct immediate : base
+        {
+        };
+        
+        struct lazy : base
+        {
+        };
+        
+        /*
+        struct cached
+        {
+        };
+        */
+    }
+
     /************
      * xclosure *
      ************/
 
     template <class T>
     class xscalar;
+
+    template <class E>
+    class xshared_expression;
 
     template <class E, class EN = void>
     struct xclosure
@@ -210,6 +236,37 @@ namespace xt
     template <class E>
     using xvalue_type_t = typename xvalue_type<E>::type;
 
+    /***********************************
+     * temporary_type_t implementation *
+     ***********************************/
+
+    namespace detail
+    {
+        template <class S>
+        struct xtype_for_shape
+        {
+            template <class T, layout_type L>
+            using type = xarray<T, L>;
+        };
+
+        template <template <class, std::size_t> class S, class X, std::size_t N>
+        struct xtype_for_shape<S<X, N>>
+        {
+            template <class T, layout_type L>
+            using type = xtensor<T, N, L>;
+        };
+
+        template <template <std::size_t...> class S, std::size_t... X>
+        struct xtype_for_shape<S<X...>>
+        {
+            template <class T, layout_type L>
+            using type = xtensor_fixed<T, xshape<X...>, L>;
+        };
+
+        template <class T, class S, layout_type L>
+        using temporary_type_t = typename xtype_for_shape<S>::template type<T, L>;
+    }
+ 
     /*************************
      * expression tag system *
      *************************/
@@ -265,16 +322,22 @@ namespace xt
             using type = T;
         };
 
-        template <>
-        struct expression_tag_and<xtensor_expression_tag, xoptional_expression_tag>
+        template <class T>
+        struct expression_tag_and<xtensor_expression_tag, T>
         {
-            using type = xoptional_expression_tag;
+            using type = T;
+        };
+
+        template <class T>
+        struct expression_tag_and<T, xtensor_expression_tag>
+            : expression_tag_and<xtensor_expression_tag, T>
+        {
         };
 
         template <>
-        struct expression_tag_and<xoptional_expression_tag, xtensor_expression_tag>
-            : expression_tag_and<xtensor_expression_tag, xoptional_expression_tag>
+        struct expression_tag_and<xtensor_expression_tag, xtensor_expression_tag>
         {
+            using type = xtensor_expression_tag;
         };
 
         template <class T1, class... T>
