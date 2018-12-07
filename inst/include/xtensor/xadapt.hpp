@@ -19,6 +19,7 @@
 #include "xarray.hpp"
 #include "xtensor.hpp"
 #include "xfixed.hpp"
+#include "xbuffer_adaptor.hpp"
 
 namespace xt
 {
@@ -93,7 +94,7 @@ namespace xt
      * @param pointer the pointer to the beginning of the dynamic array
      * @param size the size of the dynamic array
      * @param ownership indicates whether the adaptor takes ownership of the array.
-     *        Possible values are ``no_ownerhsip()`` or ``acquire_ownership()``
+     *        Possible values are ``no_ownership()`` or ``acquire_ownership()``
      * @param shape the shape of the xarray_adaptor
      * @param l the layout_type of the xarray_adaptor
      * @param alloc the allocator used for allocating / deallocating the dynamic array
@@ -109,7 +110,7 @@ namespace xt
      * @param pointer the pointer to the beginning of the dynamic array
      * @param size the size of the dynamic array
      * @param ownership indicates whether the adaptor takes ownership of the array.
-     *        Possible values are ``no_ownerhsip()`` or ``acquire_ownership()``
+     *        Possible values are ``no_ownership()`` or ``acquire_ownership()``
      * @param shape the shape of the xarray_adaptor
      * @param strides the strides of the xarray_adaptor
      * @param alloc the allocator used for allocating / deallocating the dynamic array
@@ -177,7 +178,7 @@ namespace xt
      * @param pointer the pointer to the beginning of the dynamic array
      * @param size the size of the dynamic array
      * @param ownership indicates whether the adaptor takes ownership of the array.
-     *        Possible values are ``no_ownerhsip()`` or ``acquire_ownership()``
+     *        Possible values are ``no_ownership()`` or ``acquire_ownership()``
      * @param l the layout_type of the xtensor_adaptor
      * @param alloc the allocator used for allocating / deallocating the dynamic array
      */
@@ -191,7 +192,7 @@ namespace xt
      * @param pointer the pointer to the beginning of the dynamic array
      * @param size the size of the dynamic array
      * @param ownership indicates whether the adaptor takes ownership of the array.
-     *        Possible values are ``no_ownerhsip()`` or ``acquire_ownership()``
+     *        Possible values are ``no_ownership()`` or ``acquire_ownership()``
      * @param shape the shape of the xtensor_adaptor
      * @param l the layout_type of the xtensor_adaptor
      * @param alloc the allocator used for allocating / deallocating the dynamic array
@@ -207,7 +208,7 @@ namespace xt
      * @param pointer the pointer to the beginning of the dynamic array
      * @param size the size of the dynamic array
      * @param ownership indicates whether the adaptor takes ownership of the array.
-     *        Possible values are ``no_ownerhsip()`` or ``acquire_ownership()``
+     *        Possible values are ``no_ownership()`` or ``acquire_ownership()``
      * @param shape the shape of the xtensor_adaptor
      * @param strides the strides of the xtensor_adaptor
      * @param alloc the allocator used for allocating / deallocating the dynamic array
@@ -264,8 +265,8 @@ namespace xt
     {
         using return_type = xarray_adaptor<xtl::closure_type_t<C>, layout_type::dynamic, std::decay_t<SC>>;
         return return_type(std::forward<C>(container),
-                           xtl::forward_sequence<typename return_type::inner_shape_type>(shape),
-                           xtl::forward_sequence<typename return_type::inner_strides_type>(strides));
+                           xtl::forward_sequence<typename return_type::inner_shape_type, SC>(shape),
+                           xtl::forward_sequence<typename return_type::inner_strides_type, SS>(strides));
     }
 
     // shape only - buffer version
@@ -291,8 +292,8 @@ namespace xt
         using return_type = xarray_adaptor<buffer_type, layout_type::dynamic, std::decay_t<SC>>;
         buffer_type buf(std::forward<P>(pointer), size, alloc);
         return return_type(std::move(buf),
-                           xtl::forward_sequence<typename return_type::inner_shape_type>(shape),
-                           xtl::forward_sequence<typename return_type::inner_strides_type>(strides));
+                           xtl::forward_sequence<typename return_type::inner_shape_type, SC>(shape),
+                           xtl::forward_sequence<typename return_type::inner_strides_type, SS>(strides));
     }
 
     /******************************************
@@ -346,14 +347,14 @@ namespace xt
     inline auto adapt(C&& ptr, const T(&shape)[N])
     {
         using shape_type = std::array<std::size_t, N>;
-        return adapt(std::forward<C>(ptr), xtl::forward_sequence<shape_type>(shape));
+        return adapt(std::forward<C>(ptr), xtl::forward_sequence<shape_type, decltype(shape)>(shape));
     }
 #else
     template <layout_type L = XTENSOR_DEFAULT_LAYOUT, class C>
     inline auto adapt(C&& ptr, std::initializer_list<std::size_t> shape)
     {
         using shape_type = xt::dynamic_shape<std::size_t>;
-        return adapt(std::forward<C>(ptr), xtl::forward_sequence<shape_type>(shape));
+        return adapt(std::forward<C>(ptr), xtl::forward_sequence<shape_type, decltype(shape)>(shape));
     }
 #endif
 
@@ -367,8 +368,8 @@ namespace xt
         constexpr std::size_t N = detail::array_size<SC>::value;
         using return_type = xtensor_adaptor<xtl::closure_type_t<C>, N, layout_type::dynamic>;
         return return_type(std::forward<C>(container),
-                           xtl::forward_sequence<typename return_type::inner_shape_type>(shape),
-                           xtl::forward_sequence<typename return_type::inner_strides_type>(strides));
+                           xtl::forward_sequence<typename return_type::inner_shape_type, SC>(shape),
+                           xtl::forward_sequence<typename return_type::inner_strides_type, SS>(strides));
     }
 
     // 1-D case - buffer version
@@ -408,8 +409,8 @@ namespace xt
         using return_type = xtensor_adaptor<buffer_type, N, layout_type::dynamic>;
         buffer_type buf(std::forward<P>(pointer), size, alloc);
         return return_type(std::move(buf),
-                           xtl::forward_sequence<typename return_type::inner_shape_type>(shape),
-                           xtl::forward_sequence<typename return_type::inner_strides_type>(strides));
+                           xtl::forward_sequence<typename return_type::inner_shape_type, SC>(shape),
+                           xtl::forward_sequence<typename return_type::inner_strides_type, SS>(strides));
     }
 }
 
