@@ -1396,6 +1396,11 @@ namespace xt
         #endif
         }
 
+        constexpr bool empty() const noexcept
+        {
+            return size() == size_type(0);
+        }
+
         constexpr size_type size() const noexcept
         {
             return N;
@@ -1527,6 +1532,7 @@ namespace xt
         template <std::ptrdiff_t OS, std::ptrdiff_t OE>
         explicit sequence_view(const sequence_view<E, OS, OE>& other);
 
+        bool empty() const;
         size_type size() const;
         const_reference operator[](std::size_t idx) const;
 
@@ -1560,6 +1566,12 @@ namespace xt
     sequence_view<E, Start, End>::sequence_view(const sequence_view<E, OS, OE>& other)
         : m_sequence(other.storage())
     {
+    }
+
+    template <class E, std::ptrdiff_t Start, std::ptrdiff_t End>
+    bool sequence_view<E, Start, End>::empty() const
+    {
+        return size() == size_type(0);
     }
 
     template <class E, std::ptrdiff_t Start, std::ptrdiff_t End>
